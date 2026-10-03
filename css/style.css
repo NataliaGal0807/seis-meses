@@ -749,14 +749,14 @@ button.b:active {
 
   /* franja de arriba */
   .st1 {
-    top: -2%;
-    left: -14%;
+    top: -5%;
+    left: -26%; /* más hacia la esquina para dejar libre el título */
     width: 52vw;
     --r: -4deg;
   } /* nube */
   .st14 {
-    top: 3%;
-    left: 64%;
+    top: -1%;
+    left: 76%; /* más hacia la esquina para dejar libre el título */
     width: 40vw;
     --r: 2deg;
   } /* nube */

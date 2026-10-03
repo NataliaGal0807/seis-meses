@@ -328,7 +328,19 @@ function abrirFotos(r) {
   $("prev").hidden = !varias;
   $("next").hidden = !varias;
   dots.hidden = !varias;
-  slides.scrollLeft = 0;
+}
+// Vuelve el slider a la primera diapositiva. Hay que llamarla CON LA VENTANA YA
+// VISIBLE: si está oculta (display: none) el navegador ignora el scrollLeft y el
+// slider reaparecía en la diapositiva donde lo dejaste la vez anterior.
+function slidesAlInicio() {
+  const s = $("slides");
+  s.scrollLeft = 0;
+  requestAnimationFrame(() => {
+    s.scrollLeft = 0;
+    document
+      .querySelectorAll("#dots .dot")
+      .forEach((d, k) => d.classList.toggle("on", k === 0));
+  });
 }
 $("slides").addEventListener("scroll", () => {
   const s = $("slides");
@@ -681,6 +693,7 @@ function render() {
       $("mT").textContent = r.titulo;
       $("mP").textContent = r.texto;
       $("modal").classList.add("on");
+      slidesAlInicio(); // siempre parte en la introducción / primera foto
       hearts(12);
       render();
     };
@@ -690,12 +703,37 @@ function render() {
     opened.size === REGALOS.length
       ? "¡Abriste todos! Te amo 💞"
       : opened.size + " de " + REGALOS.length + " abiertos";
+  // el botón de reinicio aparece cuando ya abriste todos los regalos
+  $("restart").hidden = opened.size < REGALOS.length;
 }
 const cerrar = () => {
   $("modal").classList.remove("on");
   detenerCamara(); // apaga la cámara si estaba prendida
 };
 $("close").onclick = cerrar;
+
+// ---- Volver a empezar ----
+// Guardamos los textos de la pantalla de la pregunta para poder restaurarlos
+const PREGUNTA_INICIAL = {
+  q: $("q").textContent,
+  qsub: $("qsub").textContent,
+  img: $("sticker").getAttribute("src"),
+};
+$("restart").onclick = () => {
+  cerrar();
+  opened.clear(); // todos los regalos vuelven a estar cerrados
+  nos = 0; // el botón "No" vuelve a empezar desde cero
+  $("q").textContent = PREGUNTA_INICIAL.q;
+  $("qsub").textContent = PREGUNTA_INICIAL.qsub;
+  $("sticker").src = PREGUNTA_INICIAL.img;
+  $("yes").style.transform = "";
+  $("yes").style.margin = "";
+  $("no").style.transform = "";
+  $("envelope").classList.remove("abriendo"); // el sobre vuelve a verse
+  render();
+  show("s1");
+  window.scrollTo(0, 0);
+};
 // cerrar tocando afuera de la tarjeta
 $("modal").addEventListener("click", (e) => {
   if (e.target === $("modal")) cerrar();
