@@ -152,7 +152,7 @@ const REGALOS = [
         sello: "3",
         titulo: "A la persona más humilde",
         texto:
-          "Haces cosas increíbles y nunca lo presumes. Esa forma de ser tuya es una de las cosas que más admiro de ti.",
+          "Haces cosas increíbles y nunca lo presumes. Esa forma de ser tuya es una de las cosas que más admiro de ti. Nunca dudes de lo que eres capaz, yo no lo hago.",
       },
       {
         diploma: true,
