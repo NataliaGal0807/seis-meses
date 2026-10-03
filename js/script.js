@@ -4,6 +4,11 @@ const NOMBRE = "mi amor";
 // Imagen de respaldo por si a algún regalo no le pones "cerrado"
 const IMG_CERRADO = "img/regalo.png";
 
+// Foto instantánea (cámara) del regalo que tenga "camara: true"
+const FOTO_TITULO = "Felices 6 meses"; // texto grande bajo la foto
+const FOTO_STICKER = "img/candado.png"; // sticker en la esquina de la foto ("" = ninguno)
+const FOTO_FONDO = "#5a2a41"; // color de fondo alrededor del polaroid (el mismo de la página)
+
 // cerrado = imagen del regalito antes de abrirlo
 // foto    = una sola foto que aparece al abrirlo
 // fotos   = VARIAS fotos (se muestran como slider). Si pones "fotos", no necesitas "foto"
@@ -177,10 +182,11 @@ const REGALOS = [
   {
     mes: 6,
     cerrado: "img/regalo6.png",
-    foto: "img/mes6.jpg",
+    foto: "img/mes6.jpg", // portada hasta que se tomen la foto
+    camara: true,
     titulo: "Seis meses… ¡y los que vienen!",
     texto:
-      "Gracias por estos seis meses. Quiero muchos más contigo. Te amo, " +
+      "Gracias por estos seis meses haciendome tan feliz y entregandome tu corazón, Te amo demasiadoooo " +
       NOMBRE +
       " 💗",
   },
@@ -397,6 +403,246 @@ function iniciarTrivia(r) {
   pregunta();
 }
 
+// ---- Foto instantánea (cámara) ----
+const crear = (tag, cls, txt) => {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (txt) e.textContent = txt;
+  return e;
+};
+const esperar = (ms) => new Promise((ok) => setTimeout(ok, ms));
+const cargarImg = (src) =>
+  new Promise((ok, no) => {
+    const i = new Image();
+    i.onload = () => ok(i);
+    i.onerror = no;
+    i.src = src;
+  });
+let camStream = null;
+function detenerCamara() {
+  if (camStream) {
+    camStream.getTracks().forEach((t) => t.stop());
+    camStream = null;
+  }
+}
+
+// Arma la foto final: marco tipo polaroid + título + fecha + sticker
+async function componer(src, sw, sh) {
+  const W = 1200,
+    H = 1500;
+  try {
+    await document.fonts.load("84px Bitcount");
+  } catch (e) {}
+  const fecha = new Date().toLocaleDateString("es-CL", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const sticker = FOTO_STICKER
+    ? await cargarImg(FOTO_STICKER).catch(() => null)
+    : null;
+  const dibujar = (conSticker) => {
+    const c = document.createElement("canvas");
+    c.width = W;
+    c.height = H;
+    const x = c.getContext("2d");
+    x.fillStyle = FOTO_FONDO;
+    x.fillRect(0, 0, W, H);
+    x.save();
+    x.shadowColor = "rgba(90,20,50,0.35)";
+    x.shadowBlur = 40;
+    x.shadowOffsetY = 14;
+    x.fillStyle = "#fffafc";
+    x.fillRect(80, 80, 1040, 1340);
+    x.restore();
+    const lado = Math.min(sw, sh); // recorte cuadrado centrado
+    x.drawImage(
+      src,
+      (sw - lado) / 2,
+      (sh - lado) / 2,
+      lado,
+      lado,
+      130,
+      130,
+      940,
+      940,
+    );
+    x.textAlign = "center";
+    x.fillStyle = "#8a2b52";
+    let tam = 84; // si el título es largo, se achica hasta que quepa
+    x.font = tam + "px Bitcount, system-ui, sans-serif";
+    while (x.measureText(FOTO_TITULO).width > 680 && tam > 40) {
+      tam -= 2;
+      x.font = tam + "px Bitcount, system-ui, sans-serif";
+    }
+    x.fillText(FOTO_TITULO, 480, 1215);
+    x.fillStyle = "#5a2a41";
+    x.font = "40px 'Trebuchet MS', system-ui, sans-serif";
+    x.fillText(fecha, 480, 1290);
+    if (conSticker && sticker) {
+      x.save();
+      x.translate(960, 1230);
+      x.rotate(0.2);
+      const w = 230,
+        h = (w * sticker.naturalHeight) / sticker.naturalWidth;
+      x.drawImage(sticker, -w / 2, -h / 2, w, h);
+      x.restore();
+    }
+    return new Promise((ok) => c.toBlob(ok, "image/jpeg", 0.92));
+  };
+  try {
+    return await dibujar(true);
+  } catch (e) {
+    return await dibujar(false); // si el navegador bloquea el sticker
+  }
+}
+
+// Guardar: en el celular abre "compartir" (ahí sale Guardar imagen); si no, descarga
+async function guardarFoto(blob) {
+  const archivo = new File([blob], "nuestra-foto.jpg", { type: "image/jpeg" });
+  if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
+    try {
+      await navigator.share({ files: [archivo] });
+      return;
+    } catch (e) {
+      if (e.name === "AbortError") return;
+    }
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "nuestra-foto.jpg";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function iniciarCamara(r) {
+  const box = $("camara");
+  let facing = "user"; // "user" = frontal, "environment" = trasera
+  const nota = (t) => crear("p", "cam-msg", t);
+
+  // respaldo: abre la cámara del teléfono (sirve si el navegador bloquea la cámara)
+  const entrada = crear("input");
+  entrada.type = "file";
+  entrada.accept = "image/*";
+  entrada.setAttribute("capture", "user");
+  entrada.hidden = true;
+  entrada.onchange = async () => {
+    const f = entrada.files[0];
+    if (!f) return;
+    const img = await cargarImg(URL.createObjectURL(f));
+    resultado(await componer(img, img.naturalWidth, img.naturalHeight), true);
+  };
+
+  function inicio(msg) {
+    detenerCamara();
+    box.innerHTML = "";
+    const marco = crear("div", "cam-box");
+    marco.append(crear("span", "cam-vacio", "Aquí va nuestra foto"));
+    const abrirBtn = crear("button", "b yes", "Abrir cámara");
+    abrirBtn.onclick = abrir;
+    const telBtn = crear("button", "b no", "Usar la cámara del teléfono");
+    telBtn.onclick = () => entrada.click();
+    box.append(
+      marco,
+      nota(msg || "Una foto de hoy, solo de nosotras."),
+      abrirBtn,
+      telBtn,
+      entrada,
+    );
+  }
+
+  async function abrir() {
+    detenerCamara();
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
+        throw new Error("sin cámara");
+      camStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: facing,
+          width: { ideal: 1280 },
+          height: { ideal: 1280 },
+        },
+        audio: false,
+      });
+    } catch (e) {
+      return inicio(
+        "No pude abrir la cámara desde la página. Prueba con el botón de abajo, que usa la cámara de tu teléfono.",
+      );
+    }
+    if (!$("modal").classList.contains("on")) return detenerCamara(); // cerraron mientras tanto
+    enVivo();
+  }
+
+  function enVivo() {
+    box.innerHTML = "";
+    const marco = crear("div", "cam-box");
+    const video = crear("video", facing === "user" ? "espejo" : "");
+    video.playsInline = true;
+    video.muted = true;
+    video.autoplay = true;
+    video.srcObject = camStream;
+    video.play().catch(() => {});
+    const cuenta = crear("div", "cam-count");
+    const flash = crear("div", "cam-flash");
+    marco.append(video, cuenta, flash);
+    const tomar = crear("button", "b yes", "Tomar foto");
+    const girar = crear("button", "b no", "Girar cámara");
+    girar.onclick = () => {
+      facing = facing === "user" ? "environment" : "user";
+      abrir();
+    };
+    tomar.onclick = async () => {
+      tomar.disabled = girar.disabled = true;
+      for (let n = 3; n > 0; n--) {
+        cuenta.textContent = n;
+        await esperar(1000);
+        if (!camStream) return; // cerraron la ventana
+      }
+      cuenta.textContent = "";
+      flash.classList.add("on");
+      setTimeout(() => flash.classList.remove("on"), 80);
+      const blob = await componer(video, video.videoWidth, video.videoHeight);
+      detenerCamara();
+      resultado(blob, true);
+    };
+    box.append(
+      marco,
+      nota("Tendrán 3 segundos para acomodarse."),
+      tomar,
+      girar,
+    );
+  }
+
+  function resultado(blob, nueva) {
+    if (nueva) {
+      if (r._url) URL.revokeObjectURL(r._url);
+      r._blob = blob;
+      r._url = URL.createObjectURL(blob);
+      r.portada = r._url; // la portada del regalo pasa a ser la foto
+      render();
+    }
+    box.innerHTML = "";
+    const img = crear("img", "cam-result");
+    img.src = r._url;
+    img.alt = "Nuestra foto";
+    const guardarBtn = crear("button", "b yes", "Guardar foto");
+    guardarBtn.onclick = () => guardarFoto(r._blob);
+    const otraBtn = crear("button", "b no", "Tomar otra");
+    otraBtn.onclick = () => inicio();
+    box.append(
+      img,
+      nota("También puedes mantener presionada la foto para guardarla."),
+      guardarBtn,
+      otraBtn,
+    );
+    hearts(10);
+  }
+
+  if (r._blob) resultado(r._blob, false);
+  else inicio();
+}
+
 const opened = new Set();
 function render() {
   $("grid").innerHTML = "";
@@ -419,14 +665,13 @@ function render() {
     b.onclick = () => {
       opened.add(i);
       // trivia o slider de fotos, según el regalo
-      document.querySelector(".slider").hidden = !!r.trivia;
+      document.querySelector(".slider").hidden = !!(r.trivia || r.camara);
       $("trivia").hidden = !r.trivia;
-      if (r.trivia) {
-        $("dots").hidden = true;
-        iniciarTrivia(r);
-      } else {
-        abrirFotos(r);
-      }
+      $("camara").hidden = !r.camara;
+      if (r.trivia || r.camara) $("dots").hidden = true;
+      if (r.trivia) iniciarTrivia(r);
+      else if (r.camara) iniciarCamara(r);
+      else abrirFotos(r);
       const enlace = $("mL");
       enlace.hidden = !r.link;
       if (r.link) {
@@ -446,13 +691,17 @@ function render() {
       ? "¡Abriste todos! Te amo 💞"
       : opened.size + " de " + REGALOS.length + " abiertos";
 }
-$("close").onclick = () => $("modal").classList.remove("on");
+const cerrar = () => {
+  $("modal").classList.remove("on");
+  detenerCamara(); // apaga la cámara si estaba prendida
+};
+$("close").onclick = cerrar;
 // cerrar tocando afuera de la tarjeta
 $("modal").addEventListener("click", (e) => {
-  if (e.target === $("modal")) $("modal").classList.remove("on");
+  if (e.target === $("modal")) cerrar();
 });
 // (opcional) cerrar con la tecla Esc en computador
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") $("modal").classList.remove("on");
+  if (e.key === "Escape") cerrar();
 });
 render();
