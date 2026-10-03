@@ -1,0 +1,849 @@
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --bg: #2a1220; /* fondo de la página */
+  --title: #ffe3ee; /* texto suelto sobre el fondo */
+  --pink: #f97ea9; /* títulos sobre el fondo */
+  --card: #fffafc; /* tarjetas */
+  --ink: #5a2a41; /* texto dentro de las tarjetas */
+  --accent: #e8588a; /* botón Sí y títulos dentro de tarjetas */
+  --soft: #f8c8dc;
+  --wine: #8a2b52; /* texto de títulos sobre el diploma */
+  --shadow: rgba(0, 0, 0, 0.4);
+}
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--title);
+  font-family: "Quicksand", "Trebuchet MS", system-ui, sans-serif;
+  text-align: center;
+  overflow-x: hidden;
+}
+
+.screen {
+  display: none;
+  min-height: 100vh;
+  min-height: 100dvh; /* altura real en celular */
+  padding: 24px 16px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+.screen.on {
+  display: flex;
+  animation: in 0.6s ease;
+}
+@keyframes in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+h1,
+h2 {
+  font-family: "Bitcount", system-ui;
+  color: var(--pink);
+  margin: 0;
+  font-weight: 400;
+}
+h1 {
+  font-size: 2.2rem;
+}
+h2 {
+  font-size: 1.9rem;
+}
+p {
+  margin: 0;
+  line-height: 1.5;
+}
+/* sombrita para que el texto se lea aunque haya un sticker detrás */
+.screen > h1,
+.screen > h2,
+.screen > p {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+/* sobre */
+.env-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  width: min(320px, 80vw);
+}
+.env-btn img {
+  width: 100%;
+  display: block;
+  filter: drop-shadow(0 14px 18px var(--shadow));
+  animation: flota 3.5s ease-in-out infinite; /* sobre flotando */
+}
+@keyframes flota {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(2deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .env-btn img {
+    animation: none;
+  }
+}
+
+.env-btn.abriendo {
+  transform: scale(1.25) rotate(-3deg);
+  opacity: 0;
+  transition:
+    transform 0.7s ease,
+    opacity 0.7s ease;
+}
+/* tarjeta */
+.card {
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 22px;
+  padding: 28px 22px;
+  max-width: 380px;
+  width: 100%;
+  box-shadow: 0 14px 34px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+.card h2 {
+  color: var(--accent);
+}
+.sticker-img {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 6px var(--shadow));
+}
+.row {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  align-items: center;
+  min-height: 64px;
+}
+button.b {
+  font: inherit;
+  font-weight: 700;
+  font-size: 1.1rem;
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 28px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.yes {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 6px 14px var(--shadow);
+}
+.no {
+  background: var(--soft);
+  color: var(--ink);
+}
+button.b:active {
+  transform: scale(0.94);
+}
+/* regalos */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  max-width: 380px;
+  width: 100%;
+}
+.gift {
+  background: var(--card);
+  border: 2px dashed var(--soft);
+  border-radius: 18px;
+  padding: 14px 8px;
+  cursor: pointer;
+  font: inherit;
+  color: var(--ink);
+  box-shadow: 0 6px 16px var(--shadow);
+  transition: transform 0.2s;
+}
+.gift:hover {
+  transform: translateY(-4px) rotate(-1.5deg);
+}
+.gift b {
+  display: block;
+  margin-top: 6px;
+}
+.gift.open {
+  border-style: solid;
+  border-color: var(--accent);
+}
+.gift small {
+  opacity: 0.7;
+}
+/* imagen de cada cuadrito de regalo */
+.gift-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain; /* sticker cerrado: se ve completo */
+  display: block;
+  filter: drop-shadow(0 4px 4px var(--shadow));
+}
+.gift-img.foto {
+  object-fit: cover; /* foto: recortada en cuadrado */
+  border-radius: 12px;
+  filter: none;
+}
+.count {
+  font-weight: 700;
+  color: var(--pink);
+}
+/* modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(40, 10, 25, 0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 5;
+}
+.modal.on {
+  display: flex;
+}
+.modal .card {
+  animation: in 0.35s ease;
+  max-height: 90dvh;
+  overflow-y: auto; /* por si el texto es largo en celulares chicos */
+}
+/* slider de fotos dentro de la ventana emergente */
+[hidden] {
+  display: none !important;
+}
+.slider {
+  --foto-h: 240px; /* alto de las fotos del slider (en computador es más alto) */
+  position: relative;
+  width: 100%;
+}
+.slides {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: 0 8px 18px var(--shadow);
+}
+.slides::-webkit-scrollbar {
+  display: none;
+}
+.slide {
+  position: relative;
+  flex: 0 0 100%;
+  margin: 0;
+  scroll-snap-align: center;
+}
+.slide img {
+  display: block;
+  width: 100%;
+  height: var(--foto-h);
+  object-fit: cover;
+}
+.badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 4px 12px;
+  border-radius: 999px;
+  box-shadow: 0 3px 8px var(--shadow);
+}
+.slide figcaption {
+  padding: 12px 14px 14px;
+  text-align: center;
+}
+.cap-t {
+  display: block;
+  font-family: "Bitcount", system-ui;
+  font-size: 1.2rem;
+  color: var(--accent);
+}
+.cap-p {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+/* diapositiva de introducción (sin foto) */
+.slide.intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--foto-h);
+  padding: 20px 18px;
+  background: var(--soft);
+}
+.intro-e {
+  font-size: 3rem;
+  line-height: 1;
+}
+.slide.intro figcaption {
+  padding: 8px 0 0;
+}
+.slide.intro .cap-t {
+  font-size: 1.4rem;
+}
+.nav {
+  position: absolute;
+  top: calc(var(--foto-h) / 2); /* a la mitad de la foto */
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 250, 252, 0.85);
+  color: var(--accent);
+  font-size: 1.6rem;
+  line-height: 1;
+  padding: 0 0 4px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px var(--shadow);
+}
+.nav.prev {
+  left: 8px;
+}
+.nav.next {
+  right: 8px;
+}
+.dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: -6px;
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--soft);
+  transition: background 0.2s;
+}
+.dot.on {
+  background: var(--accent);
+}
+/* ================= DIPLOMA (Salón de la fama) =================
+   La imagen es vertical (3:4). Todo se mide en % del ancho de la diapositiva,
+   así se adapta a cualquier pantalla. Si un texto es muy largo, el diploma
+   se alarga un poco en vez de cortarse. */
+.slider.dip-mode {
+  width: calc(100% + 44px); /* ocupa todo el ancho de la tarjeta */
+  margin: 0 -22px;
+}
+.slider.dip-mode .slides {
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding-bottom: 0;
+}
+.slider.dip-mode .nav {
+  top: 50%;
+}
+.slide.diploma {
+  position: relative;
+  aspect-ratio: 1135 / 1514;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* arriba: deja libre el lazo; abajo: espacio para el sello */
+  padding: 58% 13% 17% 19%;
+  background: url("../img/diploma.webp") center / 100% 100% no-repeat;
+}
+.dip-cert {
+  position: absolute;
+  top: 21%;
+  left: 47%;
+  right: 7%;
+  font-family: "Bitcount", system-ui;
+  font-size: 1.2rem;
+  color: var(--wine);
+  text-align: center;
+}
+.dip-n {
+  position: absolute;
+  top: 24%;
+  left: 47%;
+  right: 7%;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0.75;
+  text-align: center;
+}
+.dip-t {
+  font-family: "Bitcount", system-ui;
+  font-size: 1.25rem;
+  line-height: 1.15;
+  color: var(--wine);
+}
+.dip-p {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.dip-seal {
+  position: absolute;
+  right: 12%;
+  bottom: 5%;
+  width: 17%;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--wine);
+  border-radius: 50%;
+  font-family: "Bitcount", system-ui;
+  font-size: 1.4rem;
+  color: var(--wine);
+  background: none; /* transparente: se ve el papel del diploma */
+  transform: rotate(-8deg);
+}
+.dip-seal::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1.5px dashed var(--wine);
+  border-radius: 50%;
+  opacity: 0.7;
+}
+/* línea que separa el slider del título del regalo */
+#mT {
+  position: relative;
+  width: 100%;
+  margin-top: 6px;
+  padding-top: 20px;
+  border-top: 2px dashed var(--soft);
+}
+#mT::before {
+  content: "💗";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -55%);
+  background: var(--card); /* tapa la línea detrás del corazón */
+  padding: 0 10px;
+  font-size: 1rem;
+  line-height: 1;
+}
+/* trivia */
+.trivia {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.tv-count {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+.tv-q {
+  font-family: "Bitcount", system-ui;
+  font-size: 1.3rem;
+  color: var(--accent);
+}
+.tv-op {
+  font: inherit;
+  font-weight: 600;
+  padding: 12px 14px;
+  border: 2px solid var(--soft);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.tv-op:active {
+  transform: scale(0.97);
+}
+.tv-op.bien {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.tv-op.mal {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+.tv-op:disabled {
+  cursor: default;
+}
+.tv-fb {
+  min-height: 1.4em;
+  font-size: 0.95rem;
+}
+.tv-next {
+  align-self: center;
+}
+/* botón con enlace (ej. playlist) */
+.link-btn {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-decoration: none;
+  padding: 12px 24px;
+  border-radius: 999px;
+  box-shadow: 0 6px 14px var(--shadow);
+  transition: transform 0.15s;
+}
+.link-btn:active {
+  transform: scale(0.94);
+}
+.heart {
+  position: fixed;
+  bottom: -30px;
+  font-size: 1.6rem;
+  pointer-events: none;
+  animation: up 4s linear forwards;
+  z-index: 9;
+}
+@keyframes up {
+  to {
+    transform: translateY(-110vh) rotate(25deg);
+    opacity: 0;
+  }
+}
+/* STICKERS DE FONDO */
+.stickers {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.st {
+  position: absolute;
+  height: auto;
+  transform: rotate(var(--r, 0deg));
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.3));
+}
+
+/* Cada sticker: width = tamaño, top/bottom/left/right = posición, --r = inclinación */
+.st1 {
+  width: min(506px, 40vw);
+  top: 4%;
+  left: -8%;
+  --r: -4deg;
+} /* nube */
+.st6 {
+  width: min(500px, 34vw);
+  bottom: 6%;
+  left: 72%;
+  --r: 3deg;
+} /* nube */
+.st14 {
+  width: min(301px, 38vw);
+  top: 10%;
+  right: -6%;
+  --r: 2deg;
+} /* nube */
+.st19 {
+  width: min(350px, 45vw);
+  bottom: 1%;
+  left: -10%;
+  --r: 2deg;
+} /* nube */
+
+.st2 {
+  width: min(110px, 22vw);
+  top: 8%;
+  right: 31%;
+  --r: 12deg;
+} /* osito */
+.st8 {
+  width: min(100px, 20vw);
+  bottom: 22%;
+  left: 2%;
+  --r: -14deg;
+} /* estrellita */
+.st10 {
+  width: min(91px, 20vw);
+  bottom: 4%;
+  left: 37%;
+  --r: 0deg;
+} /* estrellita */
+.st12 {
+  width: min(95px, 19vw);
+  bottom: 3%;
+  right: 38%;
+  --r: 10deg;
+} /* osito */
+.st18 {
+  width: min(90px, 18vw);
+  bottom: 40%;
+  left: 3%;
+  --r: -20deg;
+} /* osito */
+
+.st9 {
+  width: min(80px, 16vw);
+  top: 30%;
+  right: 4%;
+  --r: 20deg;
+} /* paleta */
+
+.st20 {
+  width: min(70px, 14vw);
+  bottom: 14%;
+  left: 23%;
+  --r: 15deg;
+} /* paleta */
+
+.st4 {
+  width: min(191px, 26vw);
+  bottom: 50%;
+  right: 67%;
+  --r: 10deg;
+} /* candado */
+.st17 {
+  width: min(148px, 24vw);
+  top: 47%;
+  right: 14%;
+  --r: 45deg;
+} /* candado */
+.st13 {
+  width: min(67px, 24vw);
+  top: 33%;
+  right: 24%;
+  --r: 0deg;
+} /* estrellita */
+
+.st7 {
+  width: min(86px, 34vw);
+  bottom: 75%;
+  left: 37%;
+  --r: 3deg;
+} /* estrellitas */
+.st11 {
+  width: min(70px, 14vw);
+  bottom: 31%;
+  right: 5%;
+  --r: 4deg;
+} /* estrellitas */
+.st16 {
+  width: min(60px, 12vw);
+  top: 36%;
+  left: 5%;
+  --r: 0deg;
+} /* estrellitas */
+
+.screen {
+  position: relative;
+  z-index: 1;
+} /* el contenido queda sobre los stickers */
+
+/* ================= CELULAR (vertical) =================
+   En pantallas angostas el contenido ocupa casi todo el ancho,
+   así que los stickers van arriba, abajo y asomándose por los lados.
+   Cada uno usa top/bottom/left/right, width = tamaño, --r = inclinación. */
+@media (max-width: 600px) {
+  .st {
+    top: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+  } /* borra las posiciones de computador */
+
+  /* franja de arriba */
+  .st1 {
+    top: -2%;
+    left: -14%;
+    width: 52vw;
+    --r: -4deg;
+  } /* nube */
+  .st14 {
+    top: 3%;
+    left: 64%;
+    width: 40vw;
+    --r: 2deg;
+  } /* nube */
+  .st2 {
+    top: 2%;
+    left: 44%;
+    width: 15vw;
+    --r: 12deg;
+  } /* osito */
+  .st7 {
+    top: 10%;
+    left: 30%;
+    width: 11vw;
+    --r: 3deg;
+  } /* estrellitas */
+
+  /* franja de abajo */
+  .st19 {
+    bottom: -2%;
+    left: -16%;
+    width: 52vw;
+    --r: 2deg;
+  } /* nube */
+  .st6 {
+    bottom: -1%;
+    left: 62%;
+    width: 46vw;
+    --r: 3deg;
+  } /* nube */
+  .st12 {
+    bottom: 1%;
+    left: 45%;
+    width: 15vw;
+    --r: 10deg;
+  } /* osito */
+  .st20 {
+    bottom: 3%;
+    left: 30%;
+    width: 11vw;
+    --r: 15deg;
+  } /* paleta */
+  .st10 {
+    bottom: 11%;
+    left: 40%;
+    width: 11vw;
+    --r: 0deg;
+  } /* estrellita */
+
+  /* a los lados (asomándose) */
+  .st9 {
+    top: 22%;
+    right: -3%;
+    width: 13vw;
+    --r: 20deg;
+  } /* paleta */
+  .st8 {
+    top: 19%;
+    left: 3%;
+    width: 11vw;
+    --r: -14deg;
+  } /* estrellita */
+  .st4 {
+    top: 30%;
+    left: -7%;
+    width: 22vw;
+    --r: 10deg;
+  } /* candado */
+  .st13 {
+    top: 42%;
+    right: 6%;
+    width: 10vw;
+    --r: 0deg;
+  } /* estrellita */
+  .st16 {
+    top: 47%;
+    left: 4%;
+    width: 10vw;
+    --r: 0deg;
+  } /* estrellitas */
+  .st17 {
+    top: 56%;
+    right: -7%;
+    width: 22vw;
+    --r: 35deg;
+  } /* candado */
+  .st18 {
+    top: 64%;
+    left: -4%;
+    width: 15vw;
+    --r: -20deg;
+  } /* osito */
+  .st11 {
+    bottom: 24%;
+    right: 5%;
+    width: 10vw;
+    --r: 4deg;
+  } /* estrellitas */
+}
+
+/* celulares bajitos (ej. 360x640): el contenido casi llena la pantalla,
+   así que quitamos lo que quedaría justo detrás del título y los textos */
+@media (max-width: 600px) and (max-height: 700px) {
+  .st1,
+  .st14,
+  .st19,
+  .st6,
+  .st2,
+  .st12,
+  .st20 {
+    display: none;
+  }
+}
+
+/* ================= COMPUTADOR (pantallas anchas) =================
+   Desde 900px de ancho: regalos de 3 en 3 y ventana un poquito más ancha.
+   Las fotos y los regalos conservan el mismo tamaño que en el celular. */
+@media (min-width: 900px) {
+  /* regalos de 3 en 3 (cada carta mide casi lo mismo que en celular) */
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 600px;
+  }
+
+  /* ventana del regalo un poquito más ancha: solo gana espacio para el texto */
+  .modal .card {
+    max-width: 450px;
+  }
+
+  /* sin marco alrededor de la foto: la sombra y las esquinas van en la foto */
+  .slides {
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding-bottom: 14px; /* para que no se corte la sombra de la foto */
+  }
+  /* la foto mantiene su tamaño de celular (336 x 240) y queda centrada */
+  .slide img {
+    width: 336px;
+    max-width: calc(100% - 28px);
+    margin: 14px auto 0;
+    border-radius: 16px;
+    box-shadow: 0 8px 18px var(--shadow);
+  }
+  .slide.intro {
+    margin-top: 14px;
+    border-radius: 16px;
+  }
+  .badge {
+    top: 24px;
+    left: calc(50% - 158px);
+  }
+  .nav {
+    top: calc(var(--foto-h) / 2 + 14px);
+  }
+
+  /* diploma en computador: un poco más chico para que quepa sin hacer scroll */
+  .slider.dip-mode {
+    width: 360px;
+    margin: 0 auto;
+  }
+}

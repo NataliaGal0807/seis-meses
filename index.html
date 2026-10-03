@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Un regalo para ti 💌</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bitcount:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="stickers" aria-hidden="true">
+      <!-- grandes de fondo (primero, para que queden detrás) -->
+      <img class="st st1" src="img/nube.png" alt="" />
+      <img class="st st6" src="img/nube.png" alt="" />
+      <img class="st st14" src="img/nube.png" alt="" />
+      <img class="st st19" src="img/nube.png" alt="" />
+      <!-- medianos y chicos -->
+      <img class="st st2" src="img/osito.png" alt="" />
+      <img class="st st8" src="img/estrellitas.png" alt="" />
+      <img class="st st13" src="img/estrellitas.png" alt="" />
+      <img class="st st10" src="img/estrellitas.png" alt="" />
+      <img class="st st12" src="img/osito.png" alt="" />
+      <img class="st st18" src="img/osito.png" alt="" />
+      <img class="st st9" src="img/paleta.png" alt="" />
+      <img class="st st20" src="img/paleta.png" alt="" />
+      <img class="st st4" src="img/candado.png" alt="" />
+      <img class="st st17" src="img/candado.png" alt="" />
+      <img class="st st7" src="img/estrellitas.png" alt="" />
+      <img class="st st11" src="img/estrellitas.png" alt="" />
+      <img class="st st16" src="img/estrellitas.png" alt="" />
+    </div>
+    <!-- 1. Sobre -->
+    <section class="screen on" id="s1">
+      <h1>Tengo algo para ti…</h1>
+      <button class="env-btn" id="envelope" aria-label="Abrir sobre">
+        <img src="img/sobre.jpg" alt="Sobre" />
+      </button>
+      <p class="hint">Toca el sobre ✨</p>
+    </section>
+
+    <!-- 2. Pregunta -->
+    <section class="screen" id="s2">
+      <div class="card">
+        <img class="sticker-img" id="sticker" src="img/sticker1.png" alt="" />
+        <h2 id="q">¿Quieres abrir mi regalo?</h2>
+        <p id="qsub">
+          Lo hice con todo el amor que esta dentro de este corazoncito que es
+          todo tuyo 💖
+        </p>
+        <div class="row" id="btns">
+          <button class="b yes" id="yes">Sí 💖</button>
+          <button class="b no" id="no">No</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Regalos -->
+    <section class="screen" id="s3">
+      <h2>Seis meses juntas</h2>
+      <p>Un regalo por cada mes. Ábrelos todos 💌</p>
+      <div class="grid" id="grid"></div>
+      <p class="count" id="count"></p>
+    </section>
+
+    <div class="modal" id="modal">
+      <div class="card">
+        <div class="slider">
+          <div class="slides" id="slides"></div>
+          <button class="nav prev" id="prev" aria-label="Foto anterior">
+            ‹
+          </button>
+          <button class="nav next" id="next" aria-label="Foto siguiente">
+            ›
+          </button>
+        </div>
+        <div class="dots" id="dots"></div>
+        <div class="trivia" id="trivia" hidden></div>
+        <h2 id="mT"></h2>
+        <p id="mP"></p>
+        <a
+          class="link-btn"
+          id="mL"
+          href="#"
+          target="_blank"
+          rel="noopener"
+          hidden
+        ></a>
+        <button class="b yes" id="close">Cerrar 💗</button>
+      </div>
+    </div>
+
+    <script src="js/script.js"></script>
+  </body>
+</html>
